@@ -40,4 +40,18 @@ public class ProductService {
 
         return productRepository.save(product);
     }
+
+    public Product removeProduct(Long productId) {
+        Optional<Product> product = productRepository.findById(productId);
+        if (product.isPresent()) {
+            productRepository.delete(product.get());
+            return product.get();
+        }
+        return null;
+    }
+    public List<Product> getProductsByCategoryID(Long categoryId) {
+        // Fetch products by the ID of the associated category
+        return productRepository.findByCategoryId(categoryId);
+    }
+
 }

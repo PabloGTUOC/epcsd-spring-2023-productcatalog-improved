@@ -48,6 +48,36 @@ public class CategoryController {
 
     // TODO: add the code for the missing system operations here:
     // 1. query categories by name
+    @GetMapping("/byName/{name}")
+    public ResponseEntity<List<Category>> getCategoriesByName(@PathVariable String name) {
+        log.trace("getCategoriesByName");
+        List<Category> categories = categoryService.findByName(name);
+        if (!categories.isEmpty()) {
+            return ResponseEntity.ok(categories);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
     // 2. query categories by description
+    @GetMapping("/byDescription/{description}")
+    public ResponseEntity<List<Category>> getCategoriesByDescription(@PathVariable String description) {
+        log.trace("getCategoriesByDescription");
+        List<Category> categories = categoryService.findByDescription(description);
+        if (!categories.isEmpty()) {
+            return ResponseEntity.ok(categories);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
     // 3. query categories by parent category (must return all categories under the category specified by the id parameter)
+    @GetMapping("/byParent/{id}")
+    public ResponseEntity<List<Category>> getCategoriesByParent(@PathVariable Long id) {
+        log.trace("getCategoriesByParent");
+        List<Category> categories = categoryService.findByParentId(id);
+        if (!categories.isEmpty()) {
+            return ResponseEntity.ok(categories);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

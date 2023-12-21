@@ -36,4 +36,15 @@ public class CategoryService {
 
         return categoryRepository.save(category);
     }
+    public List<Category> findByName(String name) {
+        return categoryRepository.findByName(name);
+    }
+
+    public List<Category> findByDescription(String description) {
+        return categoryRepository.findByDescription(description);
+    }
+
+    public List<Category> findByParentId(Long parentId) {
+        return categoryRepository.findByParentId(parentId);
+    }
 }

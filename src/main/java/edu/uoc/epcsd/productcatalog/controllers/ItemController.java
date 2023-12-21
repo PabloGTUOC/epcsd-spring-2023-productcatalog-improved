@@ -10,10 +10,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
+import edu.uoc.epcsd.productcatalog.kafka.KafkaConstants;
+import edu.uoc.epcsd.productcatalog.kafka.ProductMessage;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.List;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Log4j2
 @RestController
@@ -22,6 +25,9 @@ public class ItemController {
 
     @Autowired
     private ItemService itemService;
+
+    @Autowired
+    private KafkaTemplate<String, ProductMessage> productKafkaTemplate;
 
     @GetMapping("/")
     @ResponseStatus(HttpStatus.OK)
@@ -60,5 +66,25 @@ public class ItemController {
     //  * use the correct HTTP verb
     //  * must ensure the item exists
     //  * if the new status is OPERATIONAL, must send a UNIT_AVAILABLE message to the kafka message queue (see ItemService.createItem method)
-
+    @PutMapping("/{serialNumber}/setOperational")
+    public ResponseEntity<String> setOperational(@PathVariable @NotNull String serialNumber, @RequestParam(name = "operational") boolean operational) {
+        log.trace("setOperational");
+        try {
+            Item updatedItem = itemService.setOperational(serialNumber, operational);
+            if (updatedItem != null) {
+                if (operational) {
+                    //TODO: send UNIT_AVAILABLE message to kafka aligned with ItemService.createItem method
+                    productKafkaTemplate.send(
+                            KafkaConstants.PRODUCT_TOPIC + KafkaConstants.SEPARATOR + KafkaConstants.UNIT_AVAILABLE,
+                            ProductMessage.builder().productId(updatedItem.getProduct().getId()).build());
+                }
+                return ResponseEntity.noContent().build(); // Item was updated
+            } else {
+                return ResponseEntity.notFound().build(); // Item was not found
+            }
+        }
+        catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage()); // Invalid request
+        }
+    }
 }

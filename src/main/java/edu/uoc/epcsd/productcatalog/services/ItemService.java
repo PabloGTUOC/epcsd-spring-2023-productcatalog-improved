@@ -35,10 +35,14 @@ public class ItemService {
     }
 
     public Item setOperational(String serialNumber, @RequestBody Boolean operational) {
+        Optional<Item> item = itemRepository.findBySerialNumber(serialNumber);
 
-        // TODO: complete this method:
-
-        return null;
+        if (item.isPresent()) {
+            item.get().setStatus(operational ? ItemStatus.OPERATIONAL : ItemStatus.NON_OPERATIONAL);
+            return itemRepository.save(item.get());
+        } else {
+            throw new IllegalArgumentException("Could not find the item with serial number: " + serialNumber);
+        }
 
     }
     public Item createItem(Long productId, String serialNumber) {
